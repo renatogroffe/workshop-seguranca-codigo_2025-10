@@ -56,22 +56,31 @@ Caso ainda não tenha uma conta no GitHub, comece instalando um aplicativo de On
 
 Em seguida crie sua conta no GitHub usando um e-mail e nome válidos, com o link a seguir trazendo algumas instruções úteis e lembrando da necessidade se habilitar o MFA (autenticação multifator): https://docs.github.com/pt/get-started/start-your-journey/creating-an-account-on-github
 
-
 ---
 
 ### 1. Preparando o repositório para estudos
-agsdgsas
-asdgag
-agasg
-asgasg
 
-agsagasd
-agsgas
+Faça um fork deste repositório em sua conta pessoal.
 
-agsagasg
-agassgga
+![Fork do projeto](img/01-fork.png)
 
-agasgs
+---
+
+### 2. Criando a automação
+
+Crie um novo workflow. Uma boa opção para isto é utilizar o template **Simple workflow**:
+
+![Simple workflow](img/02-simple-workflow.png)
+
+Faça se achar necessário algumas alterações utilizando código bash e conclua isto com um commit. Seu workflow irá iniciar uma execução automática, sendo possível acompanhar o processamento do mesmo em tempo real:
+
+![Workflow executando](img/03-workflow-executando.png)
+
+---
+
+### 3. Acertando o workflow
+
+Substitua o código de seu workflow pelo conteúdo a seguir:
 
 ```yaml
 name: workshop
@@ -324,10 +333,10 @@ jobs:
         run: |
           kubectl logs job.batch/exemplo-job -n integrationtests
 
-#      - name: Deployment do ConfigMap no ambiente de testes - namespace integrationtests
-#        run: |
-#          cd ${{ env.DIR_DEVOPS_ARTIFACTS }}
-#          kubectl apply -f configmap-teste.yml -n integrationtests
+      - name: Deployment do ConfigMap no ambiente de testes - namespace integrationtests
+        run: |
+          cd ${{ env.DIR_DEVOPS_ARTIFACTS }}
+          kubectl apply -f configmap-teste.yml -n integrationtests
 
       - name: Verificar ConfigMaps no ambiente de testes - namespace integrationtests
         run: |
@@ -356,5 +365,156 @@ jobs:
         run: |
           kor all -n integrationtests
 ```
+
+O scan de secrets, Dockerfile e YAML do Kubernetes apresentará falhas:
+
+![Workflow executando](img/04-workflow-erros.png)
+
+Parte dessas falhas pode ser observada em **Security > Code scanning**:
+
+![Security > Code scanning](img/05-security-code-scanning.png)
+
+E o restante estará indicado em um arquivo .pdf compactado como um Artifact:
+
+![PDF compactado como Artifact](img/06-artifact-pdf.png)
+
+> **Nota:**  
+> A partir daqui não incluiremos mais prints, a fim de incentivar um maior engajamento com a realização das atividades práticas.
+
+### 4. Corrigindo problemas no arquivo appsettings.json
+
+Versão do arquivo com problemas:
+
+```yaml
+{
+    "EndpointRequest": "https://baconipsum.com/api/?type=meat-and-filler",
+    "ApiKey": "************"
+}
+```
+
+Remover no arquivo YAML (**/src/appsettings.json**) a configuração **"ApiKey"** e seu respectivo valor.
+
+```yaml
+{
+    "EndpointRequest": "https://baconipsum.com/api/?type=meat-and-filler"
+}
+```
+
+Gravar as alterações e observar uma nova execução do workflow.
+
+---
+
+### 5. Corrigindo problemas no arquivo Dockerfile
+
+Versão do arquivo com problemas:
+
+```yaml
+FROM mcr.microsoft.com/dotnet/sdk:latest AS build-env
+WORKDIR /app
+
+# Copiar csproj e restaurar dependencias
+COPY *.csproj ./
+RUN dotnet restore
+
+# Build da aplicacao
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+# Build da imagem
+FROM mcr.microsoft.com/dotnet/runtime:latest
+WORKDIR /app
+COPY --from=build-env /app/out .
+ENTRYPOINT ["dotnet", "ConsoleAppJobHttpRequest.dll"]
+
+```
+
+Versão corrigida:
+
+```yaml
+FROM mcr.microsoft.com/dotnet/sdk:9.0.304 AS build-env
+WORKDIR /app
+
+# Copiar csproj e restaurar dependencias
+COPY *.csproj ./
+RUN dotnet restore
+
+# Build da aplicacao
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+# Build da imagem
+FROM mcr.microsoft.com/dotnet/runtime:9.0.8
+WORKDIR /app
+COPY --from=build-env /app/out .
+ENTRYPOINT ["dotnet", "ConsoleAppJobHttpRequest.dll"]
+```
+
+Executar novamente.
+
+---
+
+### 6. Corrigindo problemas no arquivo YAML do Kubernetes
+
+Versão do arquivo com problemas:
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: exemplo-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: exemplo
+        image: workshop/job-httprequest:#{GITHUB_RUN_NUMBER}#
+        env:
+        - name: EndpointNotificacao
+          value: "https://baconipsum.com/api/?type=all-meat"
+      restartPolicy: Never
+```
+
+Alterar o arquivo YAML (**/devops/job-teste.yaml**) incluindo as configurações **allowPrivilegeEscalation** e **resources** (limites para execução).
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: exemplo-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: exemplo
+        image: workshop/job-httprequest:#{GITHUB_RUN_NUMBER}#
+        env:
+        - name: EndpointNotificacao
+          value: "https://baconipsum.com/api/?type=all-meat"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "128Mi"
+            cpu: "100m"
+        securityContext:
+          allowPrivilegeEscalation: false
+      restartPolicy: Never
+```
+
+Gravar as alterações e observar uma nova execução do workflow.
+
+Referências sobre estes tópicos:
+- https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+- https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+
+---
+
+### 7. Conclusão
+
+Se tudo der certo, teremos uma execução com sinal verde 🟢 em todos os estágios... E uma resposta da API falando sobre bacon e outras iguarias 😂:
+
+![Exercício concluído](img/07-exercicio-concluido.png)
+
 asfaf
 agasdgs
