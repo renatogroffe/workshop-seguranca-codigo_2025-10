@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppJobHttpRequest", "ConsoleAppJobHttpRequest.csproj", "{CAD05B89-29CB-71AF-3313-70479937AD2A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CAD05B89-29CB-71AF-3313-70479937AD2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAD05B89-29CB-71AF-3313-70479937AD2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAD05B89-29CB-71AF-3313-70479937AD2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAD05B89-29CB-71AF-3313-70479937AD2A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {74DDB822-AE2D-4F87-814B-E509B9461509}
+	EndGlobalSection
+EndGlobal

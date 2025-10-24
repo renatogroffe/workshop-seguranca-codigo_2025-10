@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: exemplo-job
+spec:
+  template:
+    spec:
+      containers:
+      - name: exemplo
+        image: workshop/job-httprequest:#{GITHUB_RUN_NUMBER}#
+        env:
+        - name: EndpointNotificacao
+          value: "https://baconipsum.com/api/?type=all-meat"
+      restartPolicy: Never
