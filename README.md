@@ -22,6 +22,7 @@ Algumas de nossas comunidades técnicas (links para Meetup e YouTube):
 - [Canal .NET](https://www.youtube.com/canaldotnet)
 - [Azure na Prática](https://www.youtube.com/azurenapratica)
 - [Coding Night](https://www.youtube.com/codingnight)
+- [Itu Developers](https://www.meetup.com/pt-BR/itu-developers/)
 
 Referências utilizadas:
 - [GitHub Actions](https://docs.github.com/en/actions)
@@ -431,7 +432,7 @@ ENTRYPOINT ["dotnet", "ConsoleAppJobHttpRequest.dll"]
 Versão corrigida:
 
 ```yaml
-FROM mcr.microsoft.com/dotnet/sdk:9.0.304 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:9.0.306 AS build-env
 WORKDIR /app
 
 # Copiar csproj e restaurar dependencias
@@ -443,7 +444,7 @@ COPY . ./
 RUN dotnet publish -c Release -o out
 
 # Build da imagem
-FROM mcr.microsoft.com/dotnet/runtime:9.0.8
+FROM mcr.microsoft.com/dotnet/runtime:9.0.10
 WORKDIR /app
 COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "ConsoleAppJobHttpRequest.dll"]
@@ -516,5 +517,6 @@ Se tudo der certo, teremos uma execução com sinal verde 🟢 em todos os está
 
 ![Exercício concluído](img/07-exercicio-concluido.png)
 
-asfaf
-agasdgs
+Um ponto interessante está ao final do job que simula um deployment no Kubernetes. A ferramenta Kor permitirá exibir objetos que não estejam em uso no cluster (e mesmo excluí-los), um tipo de ocorrência bastante comum:
+
+![Análise com Kor](img/08-analise-kor.png)
